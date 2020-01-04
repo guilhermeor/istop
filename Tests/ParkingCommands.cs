@@ -5,7 +5,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Domain.ValueObjects;
 using Infrastructure;
-using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -21,16 +21,18 @@ namespace Tests
         private const string parkingIdFake = "565378a0-2006-4bdf-9e17-0aa01f3cb49b";
         private readonly Mock<IParkingRepository> _mockParkingRepository;
         private readonly Mock<IUnitOfWork> _mockUow;
+        private readonly Mock<DbSet<Parking>> _mockSet;
         private readonly RemoveParkingRequestHandler _commandHandler;
         public ParkingCommands()
         {
             parkings = new List<Parking>() {
-                new Parking(Guid.Parse("565378a0-2006-4bdf-9e17-0aa01f3cb49b"), "Parking1", new Address("carambola","123") ,5),
+                new Parking(Guid.Parse(parkingIdFake), "Parking1", new Address("carambola","123") ,5),
                 new Parking(Guid.NewGuid(), "Parking2", new Address("acerola","456"), 15)
             };
             _mockParkingRepository = new Mock<IParkingRepository>();
             _mockUow = new Mock<IUnitOfWork>();
             _commandHandler = new RemoveParkingRequestHandler(_mockParkingRepository.Object, _mockUow.Object);
+            _mockSet = new Mock<DbSet<Parking>>();
         }
 
         [Theory]
@@ -43,16 +45,18 @@ namespace Tests
 
             var result = await _commandHandler.Handle(new RemoveParkingRequest { Id = Guid.Parse(id) }, CancellationToken.None);
 
+            void Verify<T>(Times times, Response response) where T : Response
+            {
+                Assert.IsType<T>(result);
+                _mockUow.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), times);
+                _mockParkingRepository.Verify(m => m.Delete(It.IsAny<Parking>()), times);
+            }
+
             if (parkings.Any(p => p.Id.ToString() == id))
-            {
-                Assert.IsType<OkResult>(result);
-                _mockUow.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-            }
+                Verify<OkResult>(Times.Once(), result);
+
             else
-            {
-                Assert.IsType<NotFoundResult>(result);
-                _mockUow.Verify(m => m.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
-            }
+                Verify<NotFoundResult>(Times.Never(), result);
         }
     }
 }
