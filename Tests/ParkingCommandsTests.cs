@@ -15,15 +15,14 @@ using Xunit;
 
 namespace Tests
 {
-    public class ParkingCommands
+    public class ParkingCommandsTests
     {
         private List<Parking> parkings;
         private const string parkingIdFake = "565378a0-2006-4bdf-9e17-0aa01f3cb49b";
         private readonly Mock<IParkingRepository> _mockParkingRepository;
         private readonly Mock<IUnitOfWork> _mockUow;
-        private readonly Mock<DbSet<Parking>> _mockSet;
         private readonly RemoveParkingRequestHandler _commandHandler;
-        public ParkingCommands()
+        public ParkingCommandsTests()
         {
             parkings = new List<Parking>() {
                 new Parking(Guid.Parse(parkingIdFake), "Parking1", new Address("carambola","123") ,5),
@@ -32,7 +31,6 @@ namespace Tests
             _mockParkingRepository = new Mock<IParkingRepository>();
             _mockUow = new Mock<IUnitOfWork>();
             _commandHandler = new RemoveParkingRequestHandler(_mockParkingRepository.Object, _mockUow.Object);
-            _mockSet = new Mock<DbSet<Parking>>();
         }
 
         [Theory]
