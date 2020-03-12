@@ -9,6 +9,7 @@ namespace Domain.Interfaces
     {
         Task<Parking> GetById(Guid id);
         Task<IEnumerable<Parking>> Get();
+        Task<IEnumerable<Parking>> Get(double originLat, double originLong, float radius);
         Task Add(Parking parking);
         void Delete(Parking parking);
     }
