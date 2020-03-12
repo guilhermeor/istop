@@ -26,6 +26,7 @@ namespace Domain.Entities
             OpeningHour = opening;
             ClosingHour = closing;
         }
+
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -34,5 +35,10 @@ namespace Domain.Entities
         public int AvailableSpaces { get; set; }
         public DateTime OpeningHour { get; set; }
         public DateTime ClosingHour { get; set; }
+
+        public void SetAddress(string street, string number, string obs, double longitude, double latitude)
+        {
+            this.Address = new Address(street, number, obs, longitude, latitude);
+        }
     }
 }

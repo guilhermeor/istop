@@ -28,15 +28,17 @@ namespace Api.Handlers.Commands
         {
             if (request.Id == Guid.Empty)
                 await _parkingRepository.Add(_mapper.Map<Parking>(request));
-
-            var parking = await _parkingRepository.GetById(request.Id);
-            if (parking != null)
-                _mapper.Map(request, parking);
             else
-                return new NotFoundResult($"Parking not found to Parking Id: {request.Id}");
+            {
+                var parking = await _parkingRepository.GetById(request.Id);
+                if (parking != null)
+                    _mapper.Map(request, parking);
+                else
+                    return new NotFoundResult($"Parking not found to Parking Id: {request.Id}");
+            }
 
             await _unitOfWork.SaveChangesAsync();
-            return new OkResult("");
+            return new OkResult($"Parking {request.Name} Created Succesfully");
         }
     }
 }
